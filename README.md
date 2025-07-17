@@ -72,7 +72,7 @@ SELECT GROUP_CONCAT(CONCAT_WS(',', col1,col2,...) SEPARATOR '~') FROM (...)
 SELECT col1, col2 FROM users LIMIT 10000
 ```
 
-- Large result sets (>1 million characters) may crash your system or spike memory. Try to stick to ~10,000 rows.
+- I set <1 million characters for binary_search function, cause it would've crash your system set it I higher, so use e.g. LIMIT 10000 for your queries, cause if they return max dumping will fail.
 - The default ASCII char range is [32–126]; anything outside returns as `?`.
 
 ---
@@ -80,24 +80,9 @@ SELECT col1, col2 FROM users LIMIT 10000
 ## 💡 Tips
 
 - Increase `-t` (threads) for faster dumps — e.g. `-t 8`
-- Test the injection point with a small query before running big ones.
+- Test the injection point with a small query before running big ones. e.g. use ```--sql-query "SELECT 'test'"```
 - Set `--true-string` to a response the server gives when condition is true.
 - This tool works great against apps filtering via `ORDER BY` clauses.
-
----
-
-## 🤖 Example Queries
-
-```sql
--- Dumping users
-SELECT id,username,password FROM users LIMIT 5000
-
--- Dumping log data
-SELECT ip,timestamp,message FROM logs LIMIT 10000
-
--- Dumping emails
-SELECT email FROM newsletter_subs LIMIT 500
-```
 
 ---
 
