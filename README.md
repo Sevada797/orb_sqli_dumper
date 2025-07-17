@@ -44,33 +44,33 @@ python3 orb_dumper.py -h
 
 ## 🎮 Modes
 
-| ՝--wish՝ | Mode                | Description                            |
+| `--wish` | Mode                | Description                            |
 |----------|---------------------|----------------------------------------|
-| ՝1՝      | Dump DB names       | Extracts all schema (database) names   |
-| ՝2՝      | Dump table names    | Prompts for DB name, then lists tables |
-| ՝3՝      | Custom query mode   | Dump results of any SELECT query       |
+| `1`      | Dump DB names       | Extracts all schema (database) names   |
+| `2`      | Dump table names    | Prompts for DB name, then lists tables |
+| `3`      | Custom query mode   | Dump results of any SELECT query       |
 
-Alternatively, you can pass a custom query using ՝--sql-query "SELECT ..."՝ directly.  
-If ՝--sql-query՝ is used, ՝--wish՝ is ignored.
+Alternatively, you can pass a custom query using `--sql-query "SELECT ..."` directly.  
+If `--sql-query` is used, `--wish` is ignored.
 
 ---
 
 ## ⚠️ Notes & Warnings
 
-- Uses the placeholder string ՝INJ՝ in your URL for injection point.
+- Uses the placeholder string `INJ` in your URL for injection point.
 - The tool wraps your query inside:
 
-՝՝՝sql
+```sql
 SELECT GROUP_CONCAT(CONCAT_WS(',', col1,col2,...) SEPARATOR '~') FROM (...)
-՝՝՝
+```
 
 - Then replaces `~` with `\n` as a workaround since actual newline had parsing issues during char-by-char extraction.
 
 - Make sure to **limit your custom queries** like:
 
-՝՝՝sql
+```sql
 SELECT col1, col2 FROM users LIMIT 10000
-՝՝՝
+```
 
 - Large result sets (>1 million characters) may crash your system or spike memory. Try to stick to ~10,000 rows.
 - The default ASCII char range is [32–126]; anything outside returns as `?`.
@@ -79,16 +79,16 @@ SELECT col1, col2 FROM users LIMIT 10000
 
 ## 💡 Tips
 
-- Increase ՝-t՝ (threads) for faster dumps — e.g. ՝-t 8՝
+- Increase `-t` (threads) for faster dumps — e.g. `-t 8`
 - Test the injection point with a small query before running big ones.
-- Set ՝--true-string՝ to a response the server gives when condition is true.
-- This tool works great against apps filtering via ՝ORDER BY՝ clauses.
+- Set `--true-string` to a response the server gives when condition is true.
+- This tool works great against apps filtering via `ORDER BY` clauses.
 
 ---
 
 ## 🤖 Example Queries
 
-՝՝՝sql
+```sql
 -- Dumping users
 SELECT id,username,password FROM users LIMIT 5000
 
@@ -97,13 +97,13 @@ SELECT ip,timestamp,message FROM logs LIMIT 10000
 
 -- Dumping emails
 SELECT email FROM newsletter_subs LIMIT 500
-՝՝՝
+```
 
 ---
 
 ## ✍️ Author Notes
 
-> “I cheated a bit while coding this 😅 — used ՝GROUP_CONCAT՝ + ՝SEPARATOR ~՝ to stack results into one value, and dumped it char-by-char using multithreading.  
+> “I cheated a bit while coding this 😅 — used `GROUP_CONCAT` + `SEPARATOR ~` to stack results into one value, and dumped it char-by-char using multithreading.  
 > Also had to cap binary search max range to avoid crashing my PC. But hey — it works beautifully.”  
 >
 > – **Dark-Sentinel / sevada797**
